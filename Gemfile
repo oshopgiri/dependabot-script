@@ -3,4 +3,6 @@
 source "https://rubygems.org"
 
 gem "irb"
-gem "dependabot-omnibus", "~> 0.142.0"
+gem "dependabot-omnibus", "~> 0.164.0"
+gem 'octokit'
+gem 'dotenv'
