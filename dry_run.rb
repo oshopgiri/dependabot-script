@@ -52,6 +52,8 @@ dependencies = parser.parse
 
 security_advisories = VulnerabilityFetcher.new(dependencies.select(&:top_level?).map(&:name), package_manager).fetch_advisories
 
+puts "|#{'Package'.rjust(50)}|#{'Vulnerable?'.rjust(15)}|#{'Current Version'.rjust(20)}|#{'Fix Version'.rjust(20)}|"
+
 dependencies.select(&:top_level?).each do |dependency|
   security_vulnerabilities = []
 
@@ -73,5 +75,31 @@ dependencies.select(&:top_level?).each do |dependency|
     security_advisories: security_vulnerabilities
   )
 
-  puts "#{dependency.name}\t#{checker.vulnerable?}"
+  next if checker.up_to_date?
+
+  if checker.vulnerable?
+    requirements_to_unlock = if !checker.requirements_unlocked_or_can_be?
+                               if checker.can_update?(requirements_to_unlock: :none)
+                                 :none
+                               else
+                                 :update_not_possible
+                               end
+                             elsif checker.can_update?(requirements_to_unlock: :own)
+                               :own
+                             elsif checker.can_update?(requirements_to_unlock: :all)
+                               :all
+                             else
+                               :update_not_possible
+                             end
+    if requirements_to_unlock.eql? :update_not_possible
+      puts "|#{dependency.name.rjust(50)}|#{checker.vulnerable?.to_s.rjust(15)}|#{'Update not possible'.rjust(41)}|"
+    else
+      updated_dependencies = checker.updated_dependencies(requirements_to_unlock: requirements_to_unlock)
+      updated_dependencies.each { |updated_dependency|
+        puts "|#{dependency.name.rjust(50)}|#{checker.vulnerable?.to_s.rjust(15)}|#{dependency.version.rjust(20)}|#{updated_dependency.version.rjust(20)}|"
+      }
+    end
+  else
+    puts "|#{dependency.name.rjust(50)}|#{checker.vulnerable?.to_s.rjust(15)}|#{''.rjust(20)}|#{''.rjust(20)}|"
+  end
 end
