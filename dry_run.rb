@@ -9,7 +9,7 @@ require 'dotenv/load'
 require 'byebug'
 require 'facets'
 require_relative 'vulnerability_fetcher'
-require_relative 'dependabot_source'
+require_relative 'dependabot_core'
 
 credentials = [
   {
@@ -48,13 +48,7 @@ parser = Dependabot::FileParsers.for_package_manager(package_manager).new(
   credentials: credentials
 )
 
-# begin
-  dependencies = parser.parse
-# rescue => e
-#   puts(e.cause)
-#   byebug
-# end
-# byebug
+dependencies = parser.parse
 
 security_advisories = VulnerabilityFetcher.new(dependencies.select(&:top_level?).map(&:name), package_manager).fetch_advisories
 
