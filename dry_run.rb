@@ -6,7 +6,10 @@ require 'dependabot/pull_request_creator'
 require 'dependabot/omnibus'
 require 'gitlab'
 require 'dotenv/load'
+require 'byebug'
+require 'facets'
 require_relative 'vulnerability_fetcher'
+require_relative 'dependabot_source'
 
 credentials = [
   {
@@ -21,7 +24,7 @@ repo_name = 'oshopgiri/dependabot_test'
 
 directory = '/'
 
-branch = 'master'
+branch = 'v1'
 
 package_manager = 'npm_and_yarn'
 
@@ -45,26 +48,26 @@ parser = Dependabot::FileParsers.for_package_manager(package_manager).new(
   credentials: credentials
 )
 
-begin
+# begin
   dependencies = parser.parse
-rescue => e
-  puts(e.inspect)
-end
+# rescue => e
+#   puts(e.cause)
+#   byebug
+# end
+# byebug
 
-security_advisories = VulnerabilityFetcher.new(dependencies.map(&:name), package_manager).fetch_advisories
+security_advisories = VulnerabilityFetcher.new(dependencies.select(&:top_level?).map(&:name), package_manager).fetch_advisories
 
 dependencies.select(&:top_level?).each do |dependency|
   security_vulnerabilities = []
 
   if security_advisories.any?
-    security_vulnerabilities = security_advisories[dependency.name.to_sym].map do |vulnerability|
-      vulnerable_versions = vulnerability[:vulnerable_versions].map { |v| requirement_class.new(v) }
-      safe_versions = vulnerability[:patched_versions].map { |v| requirement_class.new(v) }
+    security_vulnerabilities = security_advisories[dependency.name].map do |vulnerability|
       Dependabot::SecurityAdvisory.new(
         dependency_name: dependency.name,
         package_manager: package_manager,
-        vulnerable_versions: vulnerable_versions,
-        safe_versions: safe_versions
+        vulnerable_versions: vulnerability[:vulnerable_versions],
+        safe_versions: vulnerability[:patched_versions]
       )
     end
   end

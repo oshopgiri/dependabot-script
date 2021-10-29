@@ -2,3 +2,4 @@
 /native-helpers
 .idea
 .env
+.byebug_history
