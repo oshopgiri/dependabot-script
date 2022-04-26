@@ -3,7 +3,7 @@
 source "https://rubygems.org"
 
 gem 'irb'
-gem 'dependabot-omnibus', '~> 0.164.0'
+gem 'dependabot-omnibus', '~> 0.182.3'
 gem 'octokit'
 gem 'dotenv'
 gem 'facets'
