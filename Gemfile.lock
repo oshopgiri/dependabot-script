@@ -97,7 +97,7 @@ GEM
       rest-client (>= 1.8.0)
     domain_name (0.5.20190701)
       unf (>= 0.0.5, < 1.0.0)
-    dotenv (2.7.6)
+    dotenv (2.8.1)
     excon (0.88.0)
     facets (3.1.0)
     faraday (1.7.0)
